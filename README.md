@@ -305,6 +305,12 @@ Open the project in:
 # 📸 Screenshots
 
 *Add app screenshots here*
+<img width="484" height="846" alt="image" src="https://github.com/user-attachments/assets/d0966813-d254-4f48-8e87-a4c6934a7ecc" />
+<img width="490" height="846" alt="image" src="https://github.com/user-attachments/assets/a9bda46b-17e8-45e8-8120-d5f7326f9000" />
+<img width="472" height="826" alt="image" src="https://github.com/user-attachments/assets/264ef238-5918-45a0-ab00-133f71de022a" />
+<img width="470" height="831" alt="image" src="https://github.com/user-attachments/assets/76424c9d-d099-4ccc-973a-c209a55742fe" />
+<img width="481" height="834" alt="image" src="https://github.com/user-attachments/assets/1164afdd-8a89-4038-8ab1-137228ac92a1" />
+<img width="485" height="826" alt="image" src="https://github.com/user-attachments/assets/fc39d5a5-856a-43f8-a128-d52585eafbf6" />
 
 ---
 
