@@ -285,7 +285,7 @@ The project includes:
 ## Clone Repository
 
 ```bash
-git clone https://github.com/sharathycse2022/Namma_Mela.git
+https://github.com/sharathycse2022-design/Namma_Mela
 ```
 
 ## Open Project
