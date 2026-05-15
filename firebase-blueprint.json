@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "Play": {
+      "title": "Drama Play",
+      "description": "Details about a specific drama performance.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "posterUrl": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "venue": { "type": "string" },
+        "genre": { "type": "string", "enum": ["Comedy", "Drama", "Devotional", "Mythological"] },
+        "status": { "type": "string", "enum": ["Active", "Ended", "Draft"] },
+        "duration": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "startTime", "venue", "status"]
+    },
+    "CastMember": {
+      "title": "Cast Member",
+      "description": "Information about an actor or performer.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "applauseCount": { "type": "integer" },
+        "bio": { "type": "string" }
+      },
+      "required": ["name", "role"]
+    },
+    "Booking": {
+      "title": "Seat Booking",
+      "description": "Record of a seat reservation.",
+      "type": "object",
+      "properties": {
+        "seatId": { "type": "string" },
+        "playId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "row": { "type": "string" },
+        "bookedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["seatId", "playId", "userId"]
+    },
+    "Applause": {
+      "title": "Fan Applause",
+      "description": "Comment or clap left by a fan.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "playId": { "type": "string" },
+        "actorId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "comment": { "type": "string" },
+        "claps": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["playId", "userId", "claps"]
+    },
+    "User": {
+      "title": "Application User",
+      "description": "Role-based user profile.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "fan"] },
+        "displayName": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/plays": { "schema": "Play", "description": "Collection of all drama plays" },
+    "/plays/{playId}/cast": { "schema": "CastMember", "description": "Actors in a specific play" },
+    "/plays/{playId}/bookings": { "schema": "Booking", "description": "Booked seats for a play" },
+    "/applause": { "schema": "Applause", "description": "Fan interactions wall" },
+    "/bookings": { "schema": "Booking", "description": "Global collection of all bookings for ticket history" },
+    "/users": { "schema": "User", "description": "User profiles and roles" }
+  }
+}

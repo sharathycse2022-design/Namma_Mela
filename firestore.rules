@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerified() && (
+        request.auth.token.email == 'sharathy_cse2022@ksit.edu.in' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validations ---
+    function isValidPlay(play) {
+      return play.name is string && play.name.size() <= 200 &&
+             play.venue is string && play.venue.size() <= 200 &&
+             play.status in ['Active', 'Ended', 'Draft'];
+    }
+
+    function isValidBooking(booking) {
+      return booking.playId is string && booking.userId == request.auth.uid &&
+             booking.seatId is string && booking.seatId.size() <= 10 &&
+             (booking.get('playName', '') is string);
+    }
+
+    function isValidApplause(applause) {
+      return applause.playId is string && applause.userId == request.auth.uid &&
+             applause.claps is int && applause.claps >= 0 && applause.claps <= 50;
+    }
+
+    // --- Collection Routes ---
+
+    // Users
+    match /users/{userId} {
+      allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow create: if isOwner(userId) && (
+        incoming().role == 'fan' || 
+        (incoming().role == 'admin' && request.auth.token.email == 'sharathy_cse2022@ksit.edu.in')
+      );
+      allow update: if isOwner(userId) && (
+        !incoming().diff(existing()).affectedKeys().hasAny(['role', 'uid'])
+      ) || isAdmin();
+    }
+
+    // Plays
+    match /plays/{playId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidPlay(incoming());
+      allow update: if isAdmin() && isValidPlay(incoming());
+      allow delete: if isAdmin();
+
+      // Sub-collection: Cast
+      match /cast/{actorId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // Sub-collection: Bookings
+      match /bookings/{bookingId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && isValidBooking(incoming());
+        allow delete: if isAdmin() || isOwner(existing().userId);
+      }
+    }
+
+    // Applause
+    match /applause/{applauseId} {
+      allow read: if true;
+      allow create: if isVerified() && isValidApplause(incoming());
+      allow update: if isVerified() && (
+        // Either the owner updating their comment
+        isOwner(existing().userId) ||
+        // Or anyone verified incrementing the clap count
+        (incoming().diff(existing()).affectedKeys().hasOnly(['claps']) && incoming().claps == existing().claps + 1)
+      );
+    }
+
+    // Global Bookings History
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidBooking(incoming());
+      allow update, delete: if isAdmin();
+    }
+  }
+}
